@@ -17,8 +17,9 @@ def extract_user_info(json_file_path='user_info.json'):
     # Extract information
     user_info = data.get('user_info', '')
     label_mapping = data.get('label_mapping', {})
+    max_results = data.get('max_results', 15)
 
-    return user_info, label_mapping
+    return user_info, label_mapping, max_results
 
 def write_to_csv(data, file_path='logs.csv'):
     # Write data to CSV file
@@ -35,8 +36,8 @@ def clear_logs(file_path='logs.csv'):
 if __name__ == "__main__":
     service = gmail.get_gmail_service()
 
-    user_info, label_mapping = extract_user_info()
-    messages = gmail.fetch_emails(service, max_results=25)
+    user_info, label_mapping, max_results = extract_user_info()
+    messages = gmail.fetch_emails(service, max_results)
 
     clear_logs()
     for index, message_id in enumerate(messages):
@@ -51,7 +52,7 @@ if __name__ == "__main__":
             # print(f"Email content - {mail_body}\n")
         except Exception as e:
             print(f"Error fetching email content: {e}\n")
-            data_to_write = ('FAILED', message_id, f"Error fetching email content: {e}")
+            data_to_write = ('FAILED', message_id, '-', f"Error fetching email content: {e}")
             write_to_csv(data_to_write)
             continue
 
@@ -61,7 +62,7 @@ if __name__ == "__main__":
             print(f"reason - {reason}\n")
         except Exception as e:
             print(f"Error processing email: {e}\n")
-            data_to_write = ('FAILED', mail_subject, f"Error processing email: {e}")
+            data_to_write = ('FAILED', mail_subject, '-', f"Error processing email: {e}")
             write_to_csv(data_to_write)
             continue
 
